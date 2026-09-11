@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Eyes That Never Meet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-0: #f7f4ec;
+    --bg-1: #fdfbf6;
+    --panel: #ffffff;
+    --panel-edge: #e6dfcd;
+    --ink: #2a2620;
+    --ink-dim: #7a7264;
+    --male: #1f8f80;
+    --male-dim: #14675c;
+    --female: #c14a72;
+    --female-dim: #983a5a;
+    --shadow-soft: 0 30px 70px -35px rgba(31,143,128,0.22), 0 30px 70px -28px rgba(193,74,114,0.16);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+  html, body {
+    min-height: 100vh;
+    background:
+      radial-gradient(55% 45% at 15% 6%, rgba(31,143,128,0.07), transparent 60%),
+      radial-gradient(50% 40% at 88% 10%, rgba(193,74,114,0.07), transparent 60%),
+      linear-gradient(180deg, var(--bg-1), var(--bg-0));
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 32px 20px 60px;
+    overflow-x: hidden;
+  }
+
+  /* ---------- STAGE 1: INTRO VIDEO OVERLAY ---------- */
+  #introStage {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: #000; z-index: 9999; transition: opacity 0.8s ease;
+  }
+  #introVideo { max-width: 100%; max-height: 100%; }
+  #skipBtn {
+    position: absolute; bottom: 24px; right: 24px;
+    background: rgba(255,255,255,0.12); color: #eee; border: 1px solid rgba(255,255,255,0.3);
+    padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; z-index: 10000;
+  }
+  #tapToStart {
+    position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    flex-direction: column; gap: 14px; background: rgba(0,0,0,0.6); color: #eee;
+    cursor: pointer; z-index: 10001; text-align: center; padding: 20px;
+  }
+  #tapToStart button {
+    padding: 12px 28px; font-size: 1rem; border-radius: 24px; border: none;
+    background: var(--female); color: white; cursor: pointer;
+  }
+
+  /* ---------- SHELL ---------- */
+  .shell { width: 100%; max-width: 920px; display: flex; flex-direction: column; gap: 20px; z-index: 1; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .tabs {
+    display: inline-flex; background: var(--panel); border: 1px solid var(--panel-edge);
+    border-radius: 999px; padding: 4px; gap: 4px; box-shadow: 0 8px 24px -18px rgba(42,38,32,0.25);
+  }
+  .tab-btn {
+    border: none; background: transparent; color: var(--ink-dim);
+    font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 14px;
+    padding: 9px 20px; border-radius: 999px; cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .tab-btn.active { background: linear-gradient(90deg, var(--male), var(--female)); color: #fff; }
+
+  .tool-btns { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+  .fs-btn, .ghost-btn {
+    border: 1px solid var(--panel-edge); background: var(--panel); color: var(--ink);
+    font-size: 13px; font-weight: 500; padding: 9px 16px; border-radius: 999px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .fs-btn:hover, .ghost-btn:hover { border-color: var(--male); }
+  .ghost-btn.small { padding: 7px 13px; font-size: 12.5px; }
+  .ghost-btn.remove { padding: 7px 9px; }
+
+  .page-view { display: flex; flex-direction: column; gap: 24px; }
+  .page-view[hidden] { display: none; }
+
+  header h1 {
+    font-family: 'Fredoka', 'Inter', sans-serif; font-weight: 600;
+    font-size: clamp(28px, 5vw, 40px); line-height: 1.12; margin: 0 0 8px; letter-spacing: -0.01em;
+  }
+  header p { margin: 0; max-width: 62ch; color: var(--ink-dim); font-size: 15.5px; line-height: 1.55; }
+  .tagline { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-dim); margin-bottom: 12px; }
+  .tagline .dot { width: 6px; height: 6px; border-radius: 50%; background: linear-gradient(90deg, var(--male), var(--female)); }
+
+  .stage-wrap {
+    position: relative; border-radius: 26px; background: var(--panel);
+    border: 1px solid var(--panel-edge);
+    box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,0.6);
+    overflow: hidden;
+  }
+  .stage-wrap:fullscreen {
+    width: 100vw; height: 100vh; border-radius: 0; background: var(--panel);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .stage-wrap:fullscreen .stage-svg { width: 100%; height: 100%; max-height: 100vh; }
+  .stage-svg { display: block; width: 100%; height: auto; touch-action: none; }
+  .male-eye-g { cursor: grab; }
+  .male-eye-g:active { cursor: grabbing; }
+
+  .hud {
+    position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between;
+    gap: 10px; padding: 14px 16px; pointer-events: none; flex-wrap: wrap;
+  }
+  .badge {
+    pointer-events: none; font-size: 12.5px; font-weight: 500; padding: 8px 14px; border-radius: 999px;
+    background: rgba(255,255,255,0.85); backdrop-filter: blur(6px); border: 1px solid var(--panel-edge);
+    display: flex; align-items: center; gap: 8px; white-space: nowrap; color: var(--ink);
+  }
+  .badge .swatch { width: 8px; height: 8px; border-radius: 50%; }
+  .badge.male .swatch { background: var(--male); box-shadow: 0 0 6px var(--male); }
+  .badge.female .swatch { background: var(--female); box-shadow: 0 0 6px var(--female); }
+  .badge span.value { color: var(--ink); font-weight: 600; }
+  .status-badge {
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+    font-size: 12.5px; font-weight: 600; padding: 7px 16px; border-radius: 999px;
+    background: rgba(255,255,255,0.9); border: 1px solid var(--panel-edge); color: var(--male-dim);
+    z-index: 5;
+  }
+
+  footer { display: flex; flex-wrap: wrap; gap: 20px 40px; border-top: 1px solid var(--panel-edge); padding-top: 18px; }
+  footer .col { flex: 1 1 260px; }
+  footer h3 { font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 600; margin: 0 0 8px; color: var(--male-dim); }
+  footer .col.her h3 { color: var(--female-dim); }
+  footer p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-dim); }
+  footer kbd {
+    font-family: inherit; font-size: 12px; padding: 2px 6px; border-radius: 6px;
+    border: 1px solid var(--panel-edge); background: var(--bg-0); color: var(--ink);
+  }
+
+  /* ---------- OVERLAY MODALS (start + win + reveal + video) ---------- */
+  .overlay-modal {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(247,244,236,0.92); backdrop-filter: blur(3px); z-index: 20;
+  }
+  .overlay-modal[hidden] { display: none; }
+  .overlay-card {
+    background: var(--panel); border: 1px solid var(--panel-edge); border-radius: 24px;
+    padding: 38px 42px; text-align: center; box-shadow: var(--shadow-soft);
+    max-width: 380px; animation: pop 0.45s cubic-bezier(.2,.9,.3,1.3);
+  }
+  @keyframes pop { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+  .overlay-card .quote {
+    font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 30px;
+    color: var(--male-dim); margin-bottom: 16px; line-height: 1.15;
+  }
+  .overlay-card h2 {
+    font-family: 'Fredoka', sans-serif; font-size: 46px; line-height: 1.1;
+    background: linear-gradient(90deg, var(--male), var(--female));
+    -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 14px;
+  }
+  .overlay-card p { font-size: 20px; font-weight: 500; color: var(--ink); margin-bottom: 22px; line-height: 1.4; }
+  .overlay-card p.sub { font-size: 14px; font-weight: 400; color: var(--ink-dim); margin-bottom: 18px; }
+  .overlay-card .sound-picker { margin-bottom: 18px; }
+  .overlay-card button.primary {
+    border: none; background: linear-gradient(90deg, var(--male), var(--female)); color: #fff;
+    font-weight: 600; font-family: 'Fredoka', sans-serif; padding: 12px 30px;
+    border-radius: 999px; cursor: pointer; font-size: 15px;
+  }
+
+  /* Video reveal overlay: near-black backdrop so the clip reads cleanly */
+  .video-modal {
+    background: rgba(10,9,7,0.94);
+  }
+  .video-modal video {
+    max-width: 92%; max-height: 88%; border-radius: 16px;
+    box-shadow: 0 30px 70px -25px rgba(0,0,0,0.6);
+    background: #000;
+  }
+
+  @media (prefers-reduced-motion: reduce) { .overlay-card { animation: none; } }
+</style>
+</head>
+<body>
+
+<!-- STAGE 1: INTRO VIDEO -->
+<div id="introStage">
+  <video id="introVideo" playsinline preload="auto">
+    <source src="Video Project 6.mp4" type="video/mp4">
+    <source src="../Video Project 6.mp4" type="video/mp4">
+    <source src="C:\Users\moham\OneDrive\Desktop\Video Project 6.mp4" type="video/mp4">
+  </video>
+  <button id="skipBtn">Skip ▶</button>
+  <div id="tapToStart">
+    <div style="font-size:1.1rem; font-weight:600;">Tap anywhere to play intro with sound</div>
+    <button id="tapBtn" type="button">▶ Play Intro</button>
+  </div>
+</div>
+
+<!-- MAIN APP SHELL -->
+<div class="shell">
+  <div class="topbar">
+    <nav class="tabs">
+      <button class="tab-btn active" data-page="useless" type="button">Useless</button>
+      <button class="tab-btn" data-page="usefull" type="button">Usefull</button>
+    </nav>
+    <div class="tool-btns">
+      <button class="fs-btn" id="musicToggleBtn" type="button">▶ Play music</button>
+      <button class="fs-btn" id="fullscreenBtn" type="button">⛶ Fullscreen</button>
+    </div>
+  </div>
+
+  <!-- ============== PAGE: USELESS ============== -->
+  <section class="page-view" id="page-useless">
+    <header>
+      <div class="tagline"><span class="dot"></span> TinkerHub Useless Project, 2026</div>
+      <h1>Eyes that never meet</h1>
+      <p>He goes wherever you steer him. Both of them keep their eyes locked on each other — and she stays just out of reach, dodging whichever way keeps the most space between them. Gloriously pointless, exactly as intended.</p>
+    </header>
+
+    <div class="stage-wrap" id="uselessStageWrap">
+      <svg class="stage-svg" id="uselessStage" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <radialGradient id="floorUseless" cx="50%" cy="30%" r="80%">
+            <stop offset="0%" stop-color="#fffdf8"/>
+            <stop offset="100%" stop-color="#f2ede0"/>
+          </radialGradient>
+        </defs>
+        <rect x="0" y="0" width="1000" height="600" fill="url(#floorUseless)"/>
+        <g id="uselessFemaleEye" class="female-eye-g"></g>
+        <g id="uselessMaleEye" class="male-eye-g"></g>
+      </svg>
+      <div class="hud">
+        <div class="badge male"><span class="swatch"></span>Him &middot; <span class="value" id="uselessPadStatus">keyboard / mouse</span></div>
+        <div class="badge female"><span class="swatch"></span>Her &middot; <span class="value">forever out of reach</span></div>
+      </div>
+
+      <!-- Start overlay -->
+      <div class="overlay-modal" id="uselessStartModal">
+        <div class="overlay-card">
+          <h2 style="font-size:32px;">Ready?</h2>
+          <p class="sub">Steer him however you like — she'll never let him catch her.</p>
+          <button class="primary" id="uselessStartBtn" type="button">Start</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="col">
+        <h3>Driving him</h3>
+        <p>Plug in a gamepad and push the left stick — <kbd>RT</kbd> speeds him up, <kbd>LT</kbd> brakes. No gamepad? <kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> steer, <kbd>Shift</kbd> accelerates, <kbd>Ctrl</kbd> brakes — or just grab him with your mouse or finger. Fullscreen the box for a bigger arena.</p>
+      </div>
+      <div class="col her">
+        <h3>Her side of things</h3>
+        <p>Both eyes stay locked on each other, no matter where he goes. The instant he closes in she darts off at an angle, never in a straight line, never letting the two of them touch.</p>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ============== PAGE: USEFULL ============== -->
+  <section class="page-view" id="page-usefull" hidden>
+    <header>
+      <div class="tagline"><span class="dot"></span> TinkerHub Usefull Project, 2026</div>
+      <h1>Eyes that (eventually) meet</h1>
+      <p>Same chase, same evasive footwork — for the first half a minute. Stay with it. Patience is the entire feature here. Every visit to this tab is a fresh match.</p>
+    </header>
+
+    <div class="stage-wrap" id="usefullStageWrap">
+      <svg class="stage-svg" id="usefullStage" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <radialGradient id="floorUsefull" cx="50%" cy="30%" r="80%">
+            <stop offset="0%" stop-color="#fffdf8"/>
+            <stop offset="100%" stop-color="#f2ede0"/>
+          </radialGradient>
+        </defs>
+        <rect x="0" y="0" width="1000" height="600" fill="url(#floorUsefull)"/>
+        <g id="usefullFemaleEye" class="female-eye-g"></g>
+        <g id="usefullMaleEye" class="male-eye-g"></g>
+      </svg>
+      <div class="status-badge" id="usefullStatus">waiting to start</div>
+      <div class="hud">
+        <div class="badge male"><span class="swatch"></span>Him &middot; <span class="value" id="usefullPadStatus">keyboard / mouse</span></div>
+        <div class="badge female"><span class="swatch"></span>Her &middot; <span class="value">30s head start</span></div>
+      </div>
+
+      <!-- Start overlay: shown fresh every time this tab is opened -->
+      <div class="overlay-modal" id="startModal">
+        <div class="overlay-card">
+          <h2 style="font-size:32px;">Ready?</h2>
+          <p class="sub">He gets 30 seconds before she stops running and comes to find him.</p>
+          <button class="primary" id="usefullStartBtn" type="button">Start</button>
+        </div>
+      </div>
+
+      <!-- Reveal-option overlay: shown once the 30s timer runs out -->
+      <div class="overlay-modal" id="revealModal" hidden>
+        <div class="overlay-card">
+          <h2 style="font-size:32px;">Time's up!</h2>
+          <p class="sub">She's done running. Ready to see what happens next?</p>
+          <button class="primary" id="revealPlayBtn" type="button">▶ Play</button>
+        </div>
+      </div>
+
+      <!-- Video overlay: plays the reveal animation before the surprise -->
+      <div class="overlay-modal video-modal" id="videoModal" hidden>
+        <video id="revealVideo" playsinline></video>
+      </div>
+
+      <!-- Win overlay -->
+      <div class="overlay-modal" id="winModal" hidden>
+        <div class="overlay-card">
+          <div class="quote">Be curious.</div>
+          <h2>Surprise!</h2>
+          <p>You have won a quarter mandhi</p>
+          <button class="primary" id="winCloseBtn" type="button">Play again</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="col">
+        <h3>Driving him</h3>
+        <p>Same controls as the Useless page — left stick, <kbd>RT</kbd>/<kbd>LT</kbd> for accelerator and brake, arrows/<kbd>WASD</kbd>, or drag him with your mouse or finger. Nothing you do speeds up the wait.</p>
+      </div>
+      <div class="col her">
+        <h3>Her side of things</h3>
+        <p>For the first 30 seconds she evades exactly like on the Useless page. After that she stops running, and you get the option to play a short reveal video — once it ends, the surprise arrives.</p>
+      </div>
+    </footer>
+  </section>
+</div>
+
+<script>
+/* ============ INTRO TRANSITION LOGIC ============ */
+(function(){
+  const introStage = document.getElementById('introStage');
+  const video = document.getElementById('introVideo');
+  const skipBtn = document.getElementById('skipBtn');
+  const tapToStart = document.getElementById('tapToStart');
+  const tapBtn = document.getElementById('tapBtn');
+
+  // Video audio is enabled at full volume
+  video.muted = false;
+  video.volume = 1;
+
+  function goToApp() {
+    video.pause();
+    video.currentTime = 0;
+    introStage.style.opacity = '0';
+    setTimeout(() => { introStage.style.display = 'none'; }, 800);
+    // Background music does NOT start here — it only starts once a page's own Start button is pressed.
+  }
+
+  video.addEventListener('ended', goToApp);
+  video.addEventListener('error', goToApp); // local/unreachable video source: don't block the app
+  skipBtn.addEventListener('click', goToApp);
+
+  function startVideoWithSound() {
+    tapToStart.style.display = 'none';
+    video.muted = false;
+    video.volume = 1;
+    const p = video.play();
+    if (p && p.catch) {
+      p.catch(goToApp);
+    }
+  }
+
+  tapBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    startVideoWithSound();
+  });
+  tapToStart.addEventListener('click', startVideoWithSound);
+
+  // Attempt unmuted playback immediately on page load
+  const p = video.play();
+  if (p && p.catch) {
+    p.then(() => {
+      video.muted = false;
+      video.volume = 1;
+    }).catch(() => {
+      // Browser autoplay policy requires a user click to play unmuted audio
+      tapToStart.style.display = 'flex';
+    });
+  }
+})();
+
+/* ============ FULLSCREEN (scoped to the active box) + TABS ============ */
+const fsBtn = document.getElementById('fullscreenBtn');
+fsBtn.addEventListener('click', () => {
+  const box = document.querySelector(`#page-${window.__activePage} .stage-wrap`);
+  if (!box) return;
+  if (!document.fullscreenElement) {
+    box.requestFullscreen?.().catch(() => {});
+  } else {
+    document.exitFullscreen?.();
+  }
+});
+document.addEventListener('fullscreenchange', () => {
+  fsBtn.textContent = document.fullscreenElement ? '⤢ Exit fullscreen' : '⛶ Fullscreen';
+});
+
+const tabButtons = Array.from(document.querySelectorAll('.tab-btn'));
+const pageViews = Array.from(document.querySelectorAll('.page-view'));
+window.__activePage = 'useless';
+tabButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.page;
+    window.__activePage = target;
+    tabButtons.forEach(b => b.classList.toggle('active', b === btn));
+    pageViews.forEach(pv => { pv.hidden = pv.id !== `page-${target}`; });
+    if (target === 'usefull') {
+      if (window.__freshUsefullMatch) window.__freshUsefullMatch();
+    } else if (target === 'useless') {
+      const uselessModal = document.getElementById('uselessStartModal');
+      const uselessWaiting = uselessModal && !uselessModal.hidden;
+      if (uselessWaiting && window.__stopBgMusicForTab) {
+        window.__stopBgMusicForTab();
+      }
+    }
+  });
+});
+
+/* ============ MUSIC / VIDEO CONFIG (set these in code — no on-page controls) ============
+   BG_MUSIC_URL: path/URL to a track that loops quietly during the game.
+   SURPRISE_SOUND_URL: path/URL to a sound that plays instead of the generated
+   chime when the surprise arrives on the Usefull page. Leave either as '' to skip it.
+   REVEAL_VIDEO_URL: path/URL to the short clip offered once the 30s timer on the
+   Usefull page runs out. It plays inside its own overlay; once it finishes (or if
+   it fails to load), the surprise modal follows automatically. Leave '' to skip
+   straight to the surprise without offering a video. */
+const BG_MUSIC_URL = 'song.mpeg';
+const SURPRISE_SOUND_URL = '';
+const REVEAL_VIDEO_URL = 'usefullanimation.mp4';
+
+/* ============ BACKGROUND MUSIC CONTROLLER ============
+   Plays ONLY while a game is actively running (after user clicks "Start" in Useless
+   or Usefull tab). Never starts from the beginning during intro or waiting screen.
+   The topbar button allows the user to pause/resume playback at any time. */
+(function(){
+  const musicBtn = document.getElementById('musicToggleBtn');
+  const musicSources = [
+    'song.mpeg',
+    '../song.mpeg',
+    'C:\\Users\\moham\\OneDrive\\Desktop\\song.mpeg',
+    'file:///C:/Users/moham/OneDrive/Desktop/song.mpeg'
+  ];
+  let srcIndex = 0;
+
+  const bgAudio = new Audio();
+  bgAudio.loop = true;
+  bgAudio.volume = 0.35;
+  bgAudio.preload = 'auto';
+
+  function applySource(idx) {
+    if (idx < musicSources.length) {
+      bgAudio.src = musicSources[idx];
+    }
+  }
+  applySource(srcIndex);
+
+  bgAudio.addEventListener('error', () => {
+    if (srcIndex + 1 < musicSources.length) {
+      srcIndex++;
+      applySource(srcIndex);
+      if (musicActive && !userPaused) {
+        bgAudio.play().catch(() => {});
+      }
+    }
+  });
+
+  let musicActive = false; // true once a Start button has been pressed
+  let userPaused = false;  // true once the user explicitly clicks Pause
+
+  function updateBtnLabel() {
+    if (!musicBtn) return;
+    if (!bgAudio.paused) {
+      musicBtn.textContent = '⏸ Pause music';
+      musicBtn.title = 'Pause background music';
+    } else {
+      musicBtn.textContent = '▶ Play music';
+      musicBtn.title = 'Play background music';
+    }
+  }
+
+  bgAudio.addEventListener('play', updateBtnLabel);
+  bgAudio.addEventListener('pause', updateBtnLabel);
+
+  function playAudio() {
+    const p = bgAudio.play();
+    if (p && p.catch) {
+      p.catch(() => {
+        updateBtnLabel();
+      });
+    }
+  }
+
+  // Called ONLY when the user clicks Start in Useless or Usefull tab
+  window.__startBgMusic = function(restartFromStart = false){
+    if (restartFromStart) {
+      try { bgAudio.currentTime = 0; } catch (e) {}
+    }
+    musicActive = true;
+    userPaused = false;
+    playAudio();
+  };
+
+  // Called when tab resets to a waiting/start screen
+  window.__stopBgMusicForTab = function(rewind = false){
+    musicActive = false;
+    bgAudio.pause();
+    if (rewind) {
+      try { bgAudio.currentTime = 0; } catch (e) {}
+    }
+    updateBtnLabel();
+  };
+
+  // Called when reveal video plays so it is not drowned out
+  window.__pauseBgMusic = function(){
+    bgAudio.pause();
+    updateBtnLabel();
+  };
+
+  if (musicBtn) {
+    updateBtnLabel();
+    musicBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!bgAudio.paused) {
+        userPaused = true;
+        bgAudio.pause();
+      } else {
+        userPaused = false;
+        musicActive = true;
+        playAudio();
+      }
+    });
+  }
+})();
+
+/* ============ SHARED CELEBRATION AUDIO ============ */
+(function(){
+  let audioCtx = null;
+  function unlockAudio(){
+    if (!audioCtx) {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (Ctx) audioCtx = new Ctx();
+    } else if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+  window.addEventListener('pointerdown', unlockAudio, { once: true });
+  window.addEventListener('keydown', unlockAudio, { once: true });
+
+  window.__playSurpriseSound = function(){
+    if (SURPRISE_SOUND_URL) {
+      const a = new Audio(SURPRISE_SOUND_URL);
+      a.volume = 0.8;
+      a.play().catch(() => {});
+      return;
+    }
+    unlockAudio();
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+
+    const bufferSize = Math.floor(audioCtx.sampleRate * 1.1);
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(0.10, now);
+    noise.connect(noiseGain).connect(audioCtx.destination);
+    noise.start(now);
+
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((freq, i) => {
+      const t = now + i * 0.13;
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.2, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+      osc.connect(g).connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 0.6);
+    });
+  };
+})();
+
+/* ============ EYE-PAIR MARKUP BUILDER ============ */
+function buildCharacterSVG(kind) {
+  const isMale = kind === 'male';
+  const r = isMale ? 68 : 61;
+  const offset = isMale ? 82 : 74;
+  const pupilR = r * 0.46;
+  const hlR = r * 0.15;
+  const browColor = isMale ? '#3a362d' : '#463040';
+  const lashColor = '#241a22';
+  const glowColor = isMale ? '#bfe9e0' : '#f6c3d6';
+
+  function browPath(side) {
+    const x = side * offset;
+    if (isMale) {
+      return `<path class="brow" d="M ${x - r * 0.9},${-r * 1.55} L ${x + r * 0.9},${-r * 1.72}" stroke="${browColor}" stroke-width="6" stroke-linecap="round" fill="none"/>`;
+    }
+    return `<path class="brow" d="M ${x - r * 0.95},${-r * 1.48} Q ${x},${-r * 2.05} ${x + r * 0.95},${-r * 1.55}" stroke="${browColor}" stroke-width="4.5" stroke-linecap="round" fill="none"/>`;
+  }
+
+  function lashes(side) {
+    if (isMale) return '';
+    const x = side * offset;
+    const d = side;
+    return `<g stroke="${lashColor}" stroke-width="3" stroke-linecap="round" fill="none">
+      <path d="M ${x + d * r * 0.85},${-r * 0.3} q ${d * 9},-13 ${d * 13},-24"/>
+      <path d="M ${x + d * r * 0.55},${-r * 0.82} q ${d * 7},-15 ${d * 9},-27"/>
+    </g>`;
+  }
+
+  function eyeUnit(side) {
+    const x = side * offset;
+    return `<g class="eye-unit">
+      <ellipse cx="${x}" cy="${r * 0.55}" rx="${r * 0.55}" ry="${r * 0.26}" fill="${glowColor}" opacity="0.35"/>
+      <circle cx="${x}" cy="${r * 0.06}" r="${r}" fill="#e9e4d8"/>
+      <circle cx="${x}" cy="0" r="${r}" fill="#fffdf8" stroke="#181419" stroke-width="${Math.max(3, r * 0.09)}"/>
+      <g class="pupil-pivot" data-cx="${x}">
+        <circle r="${pupilR}" fill="#100e12"/>
+        <circle cx="${-pupilR * 0.32}" cy="${-pupilR * 0.32}" r="${hlR}" fill="#fff"/>
+      </g>
+    </g>`;
+  }
+
+  return `${browPath(-1)}${browPath(1)}
+    <g class="blink-group">
+      ${eyeUnit(-1)}${lashes(-1)}${eyeUnit(1)}${lashes(1)}
+    </g>`;
+}
+
+['useless', 'usefull'].forEach(page => {
+  document.getElementById(`${page}MaleEye`).innerHTML = buildCharacterSVG('male');
+  document.getElementById(`${page}FemaleEye`).innerHTML = buildCharacterSVG('female');
+});
+
+/* ============ SHARED INPUT STATE ============ */
+const keys = { up: false, down: false, left: false, right: false, accel: false, brake: false };
+const keyMap = {
+  ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+  w: 'up', s: 'down', a: 'left', d: 'right',
+  W: 'up', S: 'down', A: 'left', D: 'right'
+};
+window.addEventListener('keydown', e => {
+  if (keyMap[e.key]) { keys[keyMap[e.key]] = true; e.preventDefault(); }
+  if (e.key === 'Shift') keys.accel = true;
+  if (e.key === 'Control') keys.brake = true;
+});
+window.addEventListener('keyup', e => {
+  if (keyMap[e.key]) { keys[keyMap[e.key]] = false; e.preventDefault(); }
+  if (e.key === 'Shift') keys.accel = false;
+  if (e.key === 'Control') keys.brake = false;
+});
+
+let activeGamepadIndex = null;
+const gamepadStatusEls = [];
+function labelForPad(gp) {
+  const id = gp.id || 'gamepad';
+  if (/f310/i.test(id)) return 'Logitech F310 connected';
+  if (/logitech/i.test(id)) return 'Logitech gamepad connected';
+  return 'gamepad connected';
+}
+window.addEventListener('gamepadconnected', e => {
+  activeGamepadIndex = e.gamepad.index;
+  gamepadStatusEls.forEach(el => { el.textContent = labelForPad(e.gamepad); });
+});
+window.addEventListener('gamepaddisconnected', e => {
+  if (e.gamepad.index === activeGamepadIndex) {
+    activeGamepadIndex = null;
+    gamepadStatusEls.forEach(el => { el.textContent = 'keyboard / mouse'; });
+  }
+});
+function pollGamepad() {
+  if (activeGamepadIndex === null) return null;
+  const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+  const gp = pads[activeGamepadIndex];
+  if (!gp) return null;
+  const x = gp.axes[0] || 0;
+  const y = gp.axes[1] || 0;
+  const lt = gp.buttons[6] ? (gp.buttons[6].value ?? (gp.buttons[6].pressed ? 1 : 0)) : 0;
+  const rt = gp.buttons[7] ? (gp.buttons[7].value ?? (gp.buttons[7].pressed ? 1 : 0)) : 0;
+  return { x, y, accel: rt, brake: lt, moving: Math.hypot(x, y) > 0.15 };
+}
+
+/* ============ PHYSICS CONSTANTS (shared) ============ */
+const BOUNDS = { xMin: 150, xMax: 850, yMin: 150, yMax: 580 };
+const MALE_SPEED_BASE = 250;
+const MALE_SPEED_MIN = 90;
+const MALE_SPEED_MAX = 460;
+const ACCEL_BONUS = 210;
+const BRAKE_CUT = 180;
+
+const MALE_R = 68, MALE_OFFSET = 82;
+const FEMALE_R = 61, FEMALE_OFFSET = 74;
+const MALE_BOUND = MALE_OFFSET + MALE_R + 8;       // ~158
+const FEMALE_BOUND = FEMALE_OFFSET + FEMALE_R + 8; // ~143
+const MIN_DIST = MALE_BOUND + FEMALE_BOUND + 35;   // hard floor, never crossed while evading
+const DESIRED_DIST = MIN_DIST + 110;               // she starts fleeing inside this
+const MEET_DIST = 150;                             // "together" threshold on the Usefull page
+
+const MALE_PUPIL_RANGE = MALE_R * 0.24;
+const FEMALE_PUPIL_RANGE = FEMALE_R * 0.24;
+
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ============ SCENE FACTORY ============ */
+function createScene(cfg) {
+  const { name, svg, maleG, femaleG, padStatusEl, statusEl, meetAfterMs, requireStart, onTimeUp, onMeet } = cfg;
+  if (padStatusEl) gamepadStatusEls.push(padStatusEl);
+
+  const state = {
+    malePos: { x: 300, y: 380 },
+    femalePos: { x: 700, y: 300 },
+    femaleHome: { x: 700, y: 300 },
+    malePupil: { x: 0, y: 0 },
+    femalePupil: { x: 0, y: 0 },
+    femaleTilt: 0,
+    dodgeAngle: 0,
+    dodgeTimer: 0,
+    startTime: performance.now(),
+    phase: requireStart ? 'idle' : 'evade',
+    met: false,
+    frozen: !!requireStart
+  };
+
+  let dragging = false;
+  function toSvgCoords(evt) {
+    const rect = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    return {
+      x: (evt.clientX - rect.left) / rect.width * vb.width + vb.x,
+      y: (evt.clientY - rect.top) / rect.height * vb.height + vb.y
+    };
+  }
+  maleG.addEventListener('pointerdown', e => {
+    if (state.frozen) return;
+    dragging = true;
+    maleG.setPointerCapture(e.pointerId);
+  });
+  svg.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const p = toSvgCoords(e);
+    state.malePos.x = clamp(p.x, BOUNDS.xMin, BOUNDS.xMax);
+    state.malePos.y = clamp(p.y, BOUNDS.yMin, BOUNDS.yMax);
+  });
+  window.addEventListener('pointerup', () => { dragging = false; });
+
+  function makeBlinker() { return { start: null, duration: 150 }; }
+  const maleBlink = makeBlinker();
+  const femaleBlink = makeBlinker();
+  function scheduleBlink(b) {
+    if (reduceMotion) return;
+    const delay = 1600 + Math.random() * 3200;
+    setTimeout(() => { b.start = performance.now(); scheduleBlink(b); }, delay);
+  }
+  scheduleBlink(maleBlink);
+  scheduleBlink(femaleBlink);
+  function blinkScale(b, now) {
+    if (b.start === null) return 1;
+    const dt = now - b.start;
+    if (dt > b.duration) { b.start = null; return 1; }
+    const p = dt / b.duration;
+    return 1 - Math.sin(p * Math.PI) * 0.94;
+  }
+
+  const maleBlinkGroup = maleG.querySelector('.blink-group');
+  const femaleBlinkGroup = femaleG.querySelector('.blink-group');
+  const malePupilEls = maleG.querySelectorAll('.pupil-pivot');
+  const femalePupilEls = femaleG.querySelectorAll('.pupil-pivot');
+
+  function reset() {
+    state.malePos.x = 300; state.malePos.y = 380;
+    state.femalePos.x = 700; state.femalePos.y = 300;
+    state.femaleTilt = 0;
+    state.dodgeAngle = 0; state.dodgeTimer = 0;
+    state.startTime = performance.now();
+    state.phase = requireStart ? 'idle' : 'evade';
+    state.met = false;
+    state.frozen = !!requireStart;
+  }
+
+  function start() {
+    if (state.phase !== 'idle') return;
+    state.phase = 'evade';
+    state.frozen = false;
+    state.startTime = performance.now();
+  }
+
+  // Called externally once the reveal video finishes (or is skipped): shows the surprise.
+  function completeSurprise() {
+    if (state.met) return;
+    state.met = true;
+    onMeet && onMeet();
+  }
+
+  let lastTs = null;
+  function frame(ts) {
+    requestAnimationFrame(frame);
+    if (lastTs === null) lastTs = ts;
+    const dt = Math.min((ts - lastTs) / 1000, 0.05);
+    lastTs = ts;
+    const t = ts / 1000;
+    const elapsed = ts - state.startTime;
+
+    if (!state.frozen) {
+      // --- male movement (only when this page is the active tab) ---
+      if (window.__activePage === name && !dragging) {
+        const gp = pollGamepad();
+        let vx = 0, vy = 0, accel = 0, brake = 0;
+        if (gp && gp.moving) {
+          vx = gp.x; vy = gp.y; accel = gp.accel; brake = gp.brake;
+        } else {
+          vx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+          vy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+          if (vx !== 0 && vy !== 0) { vx *= 0.7071; vy *= 0.7071; }
+          accel = keys.accel ? 1 : (gp ? gp.accel : 0);
+          brake = keys.brake ? 1 : (gp ? gp.brake : 0);
+        }
+        const speed = clamp(MALE_SPEED_BASE + accel * ACCEL_BONUS - brake * BRAKE_CUT, MALE_SPEED_MIN, MALE_SPEED_MAX);
+        state.malePos.x = clamp(state.malePos.x + vx * speed * dt, BOUNDS.xMin, BOUNDS.xMax);
+        state.malePos.y = clamp(state.malePos.y + vy * speed * dt, BOUNDS.yMin, BOUNDS.yMax);
+      }
+
+      // --- phase transition for the Usefull page: 30s timer runs out ---
+      // She freezes in place and we hand control to the reveal-video / surprise flow outside the loop.
+      if (meetAfterMs && state.phase === 'evade' && elapsed >= meetAfterMs) {
+        state.phase = 'waiting';
+        state.frozen = true;
+        onTimeUp && onTimeUp();
+      }
+
+      // --- female target ---
+      let targetX, targetY;
+      const dx0 = state.femalePos.x - state.malePos.x;
+      const dy0 = state.femalePos.y - state.malePos.y;
+      const dist0 = Math.hypot(dx0, dy0) || 0.0001;
+
+      state.dodgeTimer -= dt;
+      if (state.dodgeTimer <= 0) {
+        state.dodgeAngle = (Math.random() * 2 - 1) * (Math.PI / 3);
+        state.dodgeTimer = 0.35 + Math.random() * 0.5;
+      }
+      if (dist0 < DESIRED_DIST) {
+        const panic = clamp(1 - dist0 / DESIRED_DIST, 0, 1);
+        const baseAngle = Math.atan2(dy0, dx0);
+        const angle = baseAngle + state.dodgeAngle * panic;
+        targetX = state.malePos.x + Math.cos(angle) * DESIRED_DIST;
+        targetY = state.malePos.y + Math.sin(angle) * DESIRED_DIST;
+      } else {
+        targetX = state.femaleHome.x + (reduceMotion ? 0 : Math.sin(t * 0.4) * 40);
+        targetY = state.femaleHome.y + (reduceMotion ? 0 : Math.cos(t * 0.33) * 30);
+      }
+      targetX = clamp(targetX, BOUNDS.xMin, BOUNDS.xMax);
+      targetY = clamp(targetY, BOUNDS.yMin, BOUNDS.yMax);
+
+      let tdx = targetX - state.malePos.x, tdy = targetY - state.malePos.y;
+      let tdist = Math.hypot(tdx, tdy) || 0.0001;
+      if (tdist < MIN_DIST) {
+        const nx = tdx / tdist, ny = tdy / tdist;
+        targetX = clamp(state.malePos.x + nx * MIN_DIST, BOUNDS.xMin, BOUNDS.xMax);
+        targetY = clamp(state.malePos.y + ny * MIN_DIST, BOUNDS.yMin, BOUNDS.yMax);
+      }
+
+      const panicBoost = clamp(1 - dist0 / DESIRED_DIST, 0, 1) * 5;
+      const posFactor = 1 - Math.exp(-dt * (4.2 + panicBoost));
+      const prevX = state.femalePos.x;
+      state.femalePos.x += (targetX - state.femalePos.x) * posFactor;
+      state.femalePos.y += (targetY - state.femalePos.y) * posFactor;
+
+      // hard safety net applied AFTER the move too, so lag or overshoot can never cause an overlap
+      const fx = state.femalePos.x - state.malePos.x;
+      const fy = state.femalePos.y - state.malePos.y;
+      const fdist = Math.hypot(fx, fy) || 0.0001;
+      if (fdist < MIN_DIST) {
+        const nx = fx / fdist, ny = fy / fdist;
+        state.femalePos.x = clamp(state.malePos.x + nx * MIN_DIST, BOUNDS.xMin, BOUNDS.xMax);
+        state.femalePos.y = clamp(state.malePos.y + ny * MIN_DIST, BOUNDS.yMin, BOUNDS.yMax);
+      }
+
+      const tiltTarget = reduceMotion ? 0 : clamp((state.femalePos.x - prevX) * 3.2, -8, 8);
+      state.femaleTilt += (tiltTarget - state.femaleTilt) * (1 - Math.exp(-dt * 5));
+    }
+
+    // --- mutual gaze: each pair of pupils looks toward the other character ---
+    const dxg = state.femalePos.x - state.malePos.x;
+    const dyg = state.femalePos.y - state.malePos.y;
+    const dg = Math.hypot(dxg, dyg) || 0.0001;
+    const maleTargetX = (dxg / dg) * MALE_PUPIL_RANGE;
+    const maleTargetY = (dyg / dg) * MALE_PUPIL_RANGE;
+    const femaleTargetX = (-dxg / dg) * FEMALE_PUPIL_RANGE;
+    const femaleTargetY = (-dyg / dg) * FEMALE_PUPIL_RANGE;
+
+    const pupilFactor = 1 - Math.exp(-dt * 9);
+    state.malePupil.x += (maleTargetX - state.malePupil.x) * pupilFactor;
+    state.malePupil.y += (maleTargetY - state.malePupil.y) * pupilFactor;
+    const femalePupilFactor = 1 - Math.exp(-dt * 10);
+    state.femalePupil.x += (femaleTargetX - state.femalePupil.x) * femalePupilFactor;
+    state.femalePupil.y += (femaleTargetY - state.femalePupil.y) * femalePupilFactor;
+
+    // --- blink ---
+    const mScale = blinkScale(maleBlink, ts);
+    const fScale = blinkScale(femaleBlink, ts);
+
+    // --- apply transforms ---
+    maleG.setAttribute('transform', `translate(${state.malePos.x.toFixed(2)} ${state.malePos.y.toFixed(2)})`);
+    maleBlinkGroup.setAttribute('transform', `scale(1 ${mScale.toFixed(3)})`);
+    malePupilEls.forEach(p => {
+      const bx = parseFloat(p.dataset.cx) || 0;
+      p.setAttribute('transform', `translate(${(bx + state.malePupil.x).toFixed(2)} ${state.malePupil.y.toFixed(2)})`);
+    });
+
+    const bobX = reduceMotion ? 0 : Math.sin(t * 1.7) * 3;
+    const bobY = reduceMotion ? 0 : Math.cos(t * 1.3) * 3;
+    femaleG.setAttribute('transform', `translate(${(state.femalePos.x + bobX).toFixed(2)} ${(state.femalePos.y + bobY).toFixed(2)}) rotate(${state.femaleTilt.toFixed(2)})`);
+    femaleBlinkGroup.setAttribute('transform', `scale(1 ${fScale.toFixed(3)})`);
+    femalePupilEls.forEach(p => {
+      const bx = parseFloat(p.dataset.cx) || 0;
+      p.setAttribute('transform', `translate(${(bx + state.femalePupil.x).toFixed(2)} ${state.femalePupil.y.toFixed(2)})`);
+    });
+
+    // --- status text (Usefull page only) ---
+    if (statusEl) {
+      if (state.met) {
+        statusEl.textContent = 'they found each other';
+      } else if (state.phase === 'idle') {
+        statusEl.textContent = 'waiting to start';
+      } else if (state.phase === 'waiting') {
+        statusEl.textContent = 'ready when you are…';
+      } else {
+        const remain = Math.max(0, Math.ceil((meetAfterMs - elapsed) / 1000));
+        statusEl.textContent = `evading… ${remain}s`;
+      }
+    }
+  }
+  requestAnimationFrame(frame);
+
+  return { reset, start, completeSurprise };
+}
+
+/* ============ INSTANTIATE SCENES ============ */
+const uselessScene = createScene({
+  name: 'useless',
+  svg: document.getElementById('uselessStage'),
+  maleG: document.getElementById('uselessMaleEye'),
+  femaleG: document.getElementById('uselessFemaleEye'),
+  padStatusEl: document.getElementById('uselessPadStatus'),
+  statusEl: null,
+  meetAfterMs: null,
+  requireStart: true,
+  onTimeUp: null,
+  onMeet: null
+});
+
+const uselessStartModal = document.getElementById('uselessStartModal');
+document.getElementById('uselessStartBtn').addEventListener('click', () => {
+  uselessStartModal.hidden = true;
+  uselessScene.start();
+  window.__startBgMusic && window.__startBgMusic(true);
+});
+
+const startModal = document.getElementById('startModal');
+const revealModal = document.getElementById('revealModal');
+const videoModal = document.getElementById('videoModal');
+const revealVideo = document.getElementById('revealVideo');
+const winModal = document.getElementById('winModal');
+
+const usefullScene = createScene({
+  name: 'usefull',
+  svg: document.getElementById('usefullStage'),
+  maleG: document.getElementById('usefullMaleEye'),
+  femaleG: document.getElementById('usefullFemaleEye'),
+  padStatusEl: document.getElementById('usefullPadStatus'),
+  statusEl: document.getElementById('usefullStatus'),
+  meetAfterMs: 30000,
+  requireStart: true,
+  onTimeUp: () => {
+    // 30s is up — offer the reveal video instead of jumping straight to the surprise.
+    revealModal.hidden = false;
+  },
+  onMeet: () => {
+    window.__playSurpriseSound();
+    winModal.hidden = false;
+  }
+});
+
+// "Play" on the reveal-option card: shows the video overlay and starts playback.
+document.getElementById('revealPlayBtn').addEventListener('click', () => {
+  revealModal.hidden = true;
+  window.__pauseBgMusic && window.__pauseBgMusic();
+  if (!REVEAL_VIDEO_URL) {
+    // No video configured — skip straight to the surprise.
+    usefullScene.completeSurprise();
+    return;
+  }
+  videoModal.hidden = false;
+  revealVideo.src = REVEAL_VIDEO_URL;
+  revealVideo.play().catch(() => {
+    // Autoplay blocked or file unreachable — fall through to the surprise anyway.
+    videoModal.hidden = true;
+    usefullScene.completeSurprise();
+  });
+});
+
+// Once the reveal video finishes (or errors out), the surprise follows automatically.
+revealVideo.addEventListener('ended', () => {
+  videoModal.hidden = true;
+  usefullScene.completeSurprise();
+});
+revealVideo.addEventListener('error', () => {
+  videoModal.hidden = true;
+  usefullScene.completeSurprise();
+});
+
+// Every time the Usefull tab is opened, it's a fresh match: reset state and show the Start screen.
+window.__freshUsefullMatch = function(){
+  usefullScene.reset();
+  revealVideo.pause();
+  revealVideo.removeAttribute('src');
+  revealModal.hidden = true;
+  videoModal.hidden = true;
+  winModal.hidden = true;
+  startModal.hidden = false;
+  window.__stopBgMusicForTab && window.__stopBgMusicForTab(true);
+};
+
+document.getElementById('usefullStartBtn').addEventListener('click', () => {
+  startModal.hidden = true;
+  usefullScene.start();
+  window.__startBgMusic && window.__startBgMusic(true);
+});
+
+document.getElementById('winCloseBtn').addEventListener('click', () => {
+  winModal.hidden = true;
+  usefullScene.reset();
+  startModal.hidden = false;
+  window.__stopBgMusicForTab && window.__stopBgMusicForTab(true);
+});
+</script>
+</body>
+</html>
