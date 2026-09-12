@@ -2,99 +2,85 @@
 
 
 
-# [Project Name] 🎯
-
+# Eyes That Never Meet 🎯
 
 ## Basic Details
-### Team Name: [Name]
 
+### Team Name: Zero Output Pvt Ltd
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+* Team Lead: Mohammed Eesa E P - College of Engineering Trikaripur
+* Member 2: Hari Govind K - College of Engineering Trikaripur
 
 ### Project Description
-[2-3 lines about what your project does]
+A pair of oversized cartoon eyes that lock gaze with each other no matter where you drag them — the "male" pair follows your keyboard, mouse, or gamepad, while the "female" pair keeps darting away just far enough that they can never actually touch.
 
 ### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
+Eyes in real life have the audacity to occasionally look away from each other, blink at inconvenient times, and — worse — sometimes actually meet. Nobody asked for eye contact to be optional.
 
 ### The Solution (that nobody asked for)
-[How are you solving it? Keep it fun!]
+We built a fully steerable pair of eyes that is physically incapable of achieving eye contact with its companion, because the companion is scripted to flee at the first sign of closeness. On the "Usefull" tab, we generously let them succeed — but only after a mandatory 30-second cooldown and an unskippable reveal video, because closure should be earned.
 
 ## Technical Details
+
 ### Technologies/Components Used
 For Software:
-- [Languages used]
-- [Frameworks used]
-- [Libraries used]
-- [Tools used]
+* **Languages:** HTML5, CSS3, JavaScript (vanilla, no frameworks)
+* **Frameworks:** None — a single self-contained `.html` file
+* **Libraries:** None — hand-rolled SVG rendering, custom physics/steering logic, and the Web Audio API for the generated "surprise" chime
+* **APIs used:** Gamepad API (Xbox/Logitech controller support), HTML5 `<audio>`/`<video>`, Fullscreen API
+* **Tools:** Any modern browser (Chrome/Edge/Firefox) — no build tools, bundlers, or servers required
 
-For Hardware:
-- [List main components]
-- [List specifications]
-- [List tools required]
+## Implementation
 
-### Implementation
-For Software:
-# Installation
-[commands]
+### For Software:
 
-# Run
-[commands]
+#### Installation
+No installation needed — it's a single static HTML file.
+```bash
+# just clone/download the repo, no dependencies to install
+git clone [your-repo-link]
+```
 
-### Project Documentation
-For Software:
+#### Run
+```bash
+# open the file directly in any modern browser
+open eyes-that-never-meet.html      # macOS
+start eyes-that-never-meet.html     # Windows
+xdg-open eyes-that-never-meet.html  # Linux
+```
+Or simply double-click the `.html` file / drag it into a browser tab.
 
-# Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
+## Project Documentation
 
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
+### For Software:
 
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
+#### Screenshots (Add at least 3)
+https://drive.google.com/drive/folders/1jIZJg4yp1TO4IpudYRSuUAmBa7MrbscW?usp=drive_link
+![Screenshot1] initial
+*male eye following female eye*
 
-# Diagrams
-![Workflow](Add your workflow/architecture diagram here)
-*Add caption explaining your workflow*
+![Screenshot2]surprise1
+*where they accept each other*
 
-For Hardware:
+![Screenshot3]surprise2
+*the one who comes forward to reveal surprise1 gets a surprise*
 
-# Schematic & Circuit
-![Circuit](Add your circuit diagram here)
-*Add caption explaining connections*
 
-![Schematic](Add your schematic diagram here)
-*Add caption explaining the schematic*
+## Project Demo
 
-# Build Photos
-![Components](Add photo of your components here)
-*List out all components shown*
+### Video
+https://drive.google.com/drive/folders/1jIZJg4yp1TO4IpudYRSuUAmBa7MrbscW?usp=drive_link
+*the video shows the project from start to end*
 
-![Build](Add photos of build process here)
-*Explain the build steps*
-
-![Final](Add photo of final product here)
-*Explain the final build*
-
-### Project Demo
-# Video
-[Add your demo video link here]
-*Explain what the video demonstrates*
-
-# Additional Demos
-[Add any extra demo materials/links]
 
 ## Team Contributions
-- [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
+* Mohammed Eesa E P : coding & animation
+* Hari Govind K: idea,improvements & design
+
 
 ---
-Made with ❤️ at TinkerHub Useless Projects 
+Made with ❤️ at TinkerHub Useless Projects, 2026
 
 ![Static Badge](https://img.shields.io/badge/TinkerHub-24?color=%23000000&link=https%3A%2F%2Fwww.tinkerhub.org%2F)
 ![Static Badge](https://img.shields.io/badge/UselessProjects--26-26?link=https%3A%2F%2Ftinkerhub.org%2Fevents%2F1M8ORET9A1%2Fuseless-projects-3.0)
